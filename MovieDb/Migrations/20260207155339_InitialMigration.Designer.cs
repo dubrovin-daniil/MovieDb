@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MoviesDB;
 
@@ -11,9 +12,11 @@ using MoviesDB;
 namespace MovieDb.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260207155339_InitialMigration")]
+    partial class InitialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,18 +33,13 @@ namespace MovieDb.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("AddedDay")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("datetime2");
@@ -53,12 +51,7 @@ namespace MovieDb.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Titles", t =>
-                        {
-                            t.HasCheckConstraint("CK_TitleName", "LEN([Name]) > 0");
-
-                            t.HasCheckConstraint("CK_TitleReleaseDate", "(YEAR(ReleaseDate)) > 0");
-                        });
+                    b.ToTable("Titles");
                 });
 
             modelBuilder.Entity("MoviesDB.Entities.User", b =>
@@ -71,7 +64,7 @@ namespace MovieDb.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -79,22 +72,11 @@ namespace MovieDb.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
-                    b.ToTable("Users", t =>
-                        {
-                            t.HasCheckConstraint("CK_UserEmail", "[Email] LIKE '%@%'");
-
-                            t.HasCheckConstraint("CK_Username", "LEN([Username]) > 0");
-                        });
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("MoviesDB.Entities.Title", b =>

@@ -36,6 +36,9 @@ namespace MoviesDB
                         break;
                     default:
                         Console.WriteLine("Invalid choice.");
+                        Console.WriteLine("Press any key to continue...");
+                        Console.ReadKey();
+                        Console.Clear();
                         break;
                 }
             }

@@ -1,4 +1,5 @@
-﻿using MoviesDB;
+﻿using Microsoft.EntityFrameworkCore;
+using MoviesDB;
 using MoviesDB.Entities;
 
 namespace MovieDb
@@ -31,13 +32,24 @@ namespace MovieDb
                 return SignInUser(db);
             }
 
-            db.Users.Add(new User
+            try 
             {
-                Username = username,
-                Email = email,
-                Password = password
-            });
-            db.SaveChanges();
+                db.Users.Add(new User
+                {
+                    Username = username,
+                    Email = email,
+                    Password = password
+                });
+                db.SaveChanges();
+            }
+            catch (DbUpdateException Dbex)
+            {
+                Console.WriteLine("An error occurred while saving the user to the database: " + Dbex.Message);
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+                Console.Clear();
+                return SignInUser(db);
+            }
 
             return new User { Username = username, Password = password, Email = email };
         }

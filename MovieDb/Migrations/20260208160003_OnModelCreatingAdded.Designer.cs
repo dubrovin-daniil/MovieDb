@@ -12,8 +12,8 @@ using MoviesDB;
 namespace MovieDb.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260201160050_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260208160003_OnModelCreatingAdded")]
+    partial class OnModelCreatingAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,13 +33,18 @@ namespace MovieDb.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("AddedDay")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR");
 
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("datetime2");
@@ -51,7 +56,12 @@ namespace MovieDb.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Titles");
+                    b.ToTable("Titles", t =>
+                        {
+                            t.HasCheckConstraint("CK_TitleName", "LEN([Name]) > 0");
+
+                            t.HasCheckConstraint("CK_TitleReleaseDate", "(YEAR(ReleaseDate)) > 0");
+                        });
                 });
 
             modelBuilder.Entity("MoviesDB.Entities.User", b =>
@@ -64,7 +74,7 @@ namespace MovieDb.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -72,11 +82,22 @@ namespace MovieDb.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("Users", t =>
+                        {
+                            t.HasCheckConstraint("CK_UserEmail", "[Email] LIKE '%@%'");
+
+                            t.HasCheckConstraint("CK_Username", "LEN([Username]) > 0");
+                        });
                 });
 
             modelBuilder.Entity("MoviesDB.Entities.Title", b =>
