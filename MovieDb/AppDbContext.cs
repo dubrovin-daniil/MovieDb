@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using MovieDb.Entities;
 using MoviesDB.Entities;
 
 namespace MoviesDB
@@ -8,8 +9,9 @@ namespace MoviesDB
     {
         public DbSet<Title> Titles { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<UserTitleView> UserTitleViews { get; set; }
 
-        private readonly string _connectionString;
+        private readonly string _connectionString = null!;
         public AppDbContext()
         {
             var config = new ConfigurationBuilder().AddJsonFile("AppConfig.json").Build();
@@ -40,7 +42,6 @@ namespace MoviesDB
 
                 b.HasMany(u => u.Titles).WithOne(t => t.User).HasForeignKey(t => t.UserId); 
             });
-
             modelBuilder.Entity<Title>(b =>
             {
                 b.Property(t => t.Name).HasColumnType("NVARCHAR").HasMaxLength(50);
@@ -52,6 +53,12 @@ namespace MoviesDB
                 });
 
                 b.HasOne(t => t.User).WithMany(u => u.Titles).HasForeignKey(t => t.UserId);
+            });
+
+            modelBuilder.Entity<UserTitleView>(b =>
+            {
+                b.HasNoKey();
+                b.ToView("vw_UserTitle");
             });
         }
     }
